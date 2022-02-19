@@ -8,10 +8,25 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './constants';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import config, { MongoConfig } from '../config/config';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://root:root@localhost:27017/admin'),
+    ConfigModule.forRoot({
+      load: [config],
+    }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => {
+        const { user, password, host, port, db } =
+          configService.get<MongoConfig>('database');
+        return {
+          uri: `mongodb://${user}:${password}@${host}:${port}/${db}`,
+        };
+      },
+      inject: [ConfigService],
+    }),
     UsersModule,
     PassportModule,
     JwtModule.register({

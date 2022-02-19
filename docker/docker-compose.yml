@@ -8,3 +8,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: root
     ports:
       - '27017:27017'
+  # auth:
+  #   image: abner/auth
+  #   container_name: tickets-auth
+  #   ports:
+  #     - '3000:3000'
