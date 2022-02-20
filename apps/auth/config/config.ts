@@ -17,7 +17,7 @@ export default (): Config => {
         user: 'root',
         password: 'root',
         host: '127.0.0.1',
-        port: '27018',
+        port: '27017', //change
         db: 'admin',
       },
     };
