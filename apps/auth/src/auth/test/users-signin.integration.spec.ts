@@ -2,10 +2,12 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthModule } from '../auth.module';
 import * as request from 'supertest';
+import { MoongoseService } from '../../db/moongose.service';
 
 describe('User Sign In', () => {
   let app: INestApplication;
   let access_token: string;
+  let moongoseService: MoongoseService;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -14,6 +16,9 @@ describe('User Sign In', () => {
 
     app = module.createNestApplication();
     await app.init();
+
+    moongoseService = module.get<MoongoseService>(MoongoseService);
+    moongoseService.cleanDatabase();
   });
 
   it('should be defined', () => {
@@ -21,9 +26,15 @@ describe('User Sign In', () => {
   });
 
   it('should signin (/POST signin)', async () => {
+    // signup user
+    await request(app.getHttpServer()).post('/users/signup').send({
+      email: 'user@gmail.com',
+      password: '12345',
+    });
+
     const res = await request(app.getHttpServer())
       .post('/auth/signin')
-      .send({ email: 'abner', password: '12345' })
+      .send({ email: 'user@gmail.com', password: '12345' })
       .expect(201);
     expect(res.body).toHaveProperty('access_token');
 
