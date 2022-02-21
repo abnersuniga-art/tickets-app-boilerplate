@@ -12,8 +12,8 @@ export class UsersService {
     return this.userModel.find();
   }
 
-  async findOneByUsernameWithPassword(username): Promise<User | undefined> {
-    return this.userModel.findOne({ username }).select('+password');
+  async findOneByEmailWithPassword(email: string): Promise<User | undefined> {
+    return this.userModel.findOne({ email }).select('+password');
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {

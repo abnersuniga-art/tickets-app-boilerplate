@@ -20,16 +20,16 @@ describe('Users Sign Up', () => {
 
   it('should sing up an user', async () => {
     const user = await usersController.signUp({
-      username: 'abner',
+      email: 'abner',
       password: '12345',
     });
-    expect(user).toMatchObject({ username: 'abner' });
+    expect(user).toMatchObject({ email: 'abner' });
   });
 
   it('should create a user with a encrypted password', async () => {
     const password = '12345';
     const user = await usersController.signUp({
-      username: 'abner',
+      email: 'abner',
       password,
     });
     expect(user.password).not.toBe(password);

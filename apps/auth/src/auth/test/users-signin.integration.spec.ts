@@ -23,7 +23,7 @@ describe('User Sign In', () => {
   it('should signin (/POST signin)', async () => {
     const res = await request(app.getHttpServer())
       .post('/auth/signin')
-      .send({ username: 'abner', password: '12345' })
+      .send({ email: 'abner', password: '12345' })
       .expect(201);
     expect(res.body).toHaveProperty('access_token');
 
