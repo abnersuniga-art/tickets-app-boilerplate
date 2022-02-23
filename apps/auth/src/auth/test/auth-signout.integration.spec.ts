@@ -1,13 +1,12 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthModule } from '../auth.module';
-import * as request from 'supertest';
 import { MoongoseService } from '../../db/moongose.service';
+import { AuthModule } from '../auth.module';
 import * as cookieParser from 'cookie-parser';
+import * as request from 'supertest';
 
-describe('User Sign In', () => {
+describe('Auth Sign Out', () => {
   let app: INestApplication;
-  let cookie: string;
   let moongoseService: MoongoseService;
 
   beforeAll(async () => {
@@ -24,33 +23,25 @@ describe('User Sign In', () => {
     moongoseService.cleanDatabase();
   });
 
-  it('should be defined', () => {
-    expect(app).toBeDefined();
-  });
-
-  it('should signin (/POST signin)', async () => {
+  it('should sign out (/POST signout)', async () => {
     // signup user
     await request(app.getHttpServer()).post('/users/signup').send({
       email: 'user@gmail.com',
       password: '12345',
     });
 
+    // signin user
     const res = await request(app.getHttpServer())
       .post('/auth/signin')
       .send({ email: 'user@gmail.com', password: '12345' })
       .expect(201);
     expect(res.headers).toHaveProperty('set-cookie');
-    cookie = res.headers['set-cookie'];
-  });
+    const cookie = res.headers['set-cookie'];
 
-  it('should have access after signin', async () => {
     await request(app.getHttpServer())
-      .get('/auth/profile')
+      .post('/auth/signout')
       .set('cookie', cookie)
-      .expect(200);
-  });
-
-  afterAll(async () => {
-    app.close();
+      .send()
+      .expect(201);
   });
 });

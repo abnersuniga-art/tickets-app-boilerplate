@@ -20,6 +20,12 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post('signout')
+  async signout(@Request() req, @Res({ passthrough: true }) res: Response) {
+    res.clearCookie('access_token');
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;

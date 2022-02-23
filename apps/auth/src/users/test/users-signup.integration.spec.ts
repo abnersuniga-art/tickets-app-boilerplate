@@ -4,11 +4,13 @@ import { AuthModule } from '../../auth/auth.module';
 import { MoongoseService } from '../../db/moongose.service';
 import { EmptyLogger } from '../../tests/empty-logger';
 import { UsersController } from '../users.controller';
+import { UsersService } from '../users.service';
 
 describe('Users Sign Up', () => {
   let app;
   let module: TestingModule;
   let usersController: UsersController;
+  let usersService: UsersService;
   let moongoseService: MoongoseService;
 
   beforeAll(async () => {
@@ -21,6 +23,7 @@ describe('Users Sign Up', () => {
     await app.init();
 
     usersController = module.get<UsersController>(UsersController);
+    usersService = module.get<UsersService>(UsersService);
     moongoseService = module.get<MoongoseService>(MoongoseService);
     moongoseService.cleanDatabase();
   });
@@ -37,12 +40,23 @@ describe('Users Sign Up', () => {
     expect(user).toMatchObject({ email: 'user1@gmail.com' });
   });
 
-  it('should create a user with a encrypted password', async () => {
-    const password = '12345';
+  it('should not return a users password', async () => {
     const user = await usersController.signUp({
       email: 'user2@gmail.com',
+      password: '12345',
+    });
+    expect(user).not.toHaveProperty('password');
+    expect(user).toMatchObject({ email: 'user2@gmail.com' });
+  });
+
+  it('should create a user with a encrypted password', async () => {
+    const email = 'user3@gmail.com';
+    const password = '12345';
+    await usersController.signUp({
+      email,
       password,
     });
+    const user = await usersService.findOneByEmailWithPassword(email);
     expect(user.password).not.toBe(password);
   });
 
@@ -50,7 +64,7 @@ describe('Users Sign Up', () => {
     await request(app.getHttpServer())
       .post('/users/signup')
       .send({
-        email: 'user2@gmail.com',
+        email: 'user3@gmail.com',
         password: '12345',
       })
       .expect(500);
