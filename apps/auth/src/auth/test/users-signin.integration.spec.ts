@@ -3,10 +3,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthModule } from '../auth.module';
 import * as request from 'supertest';
 import { MoongoseService } from '../../db/moongose.service';
+import * as cookieParser from 'cookie-parser';
 
 describe('User Sign In', () => {
   let app: INestApplication;
-  let access_token: string;
+  let cookie: string;
   let moongoseService: MoongoseService;
 
   beforeAll(async () => {
@@ -15,6 +16,8 @@ describe('User Sign In', () => {
     }).compile();
 
     app = module.createNestApplication();
+    // needed to parse the jwt in the cookies
+    app.use(cookieParser());
     await app.init();
 
     moongoseService = module.get<MoongoseService>(MoongoseService);
@@ -36,15 +39,14 @@ describe('User Sign In', () => {
       .post('/auth/signin')
       .send({ email: 'user@gmail.com', password: '12345' })
       .expect(201);
-    expect(res.body).toHaveProperty('access_token');
-
-    access_token = res.body.access_token;
+    expect(res.headers).toHaveProperty('set-cookie');
+    cookie = res.headers['set-cookie'];
   });
 
   it('should have access after signin', async () => {
     await request(app.getHttpServer())
       .get('/auth/profile')
-      .set('Authorization', `Bearer ${access_token}`)
+      .set('cookie', cookie)
       .expect(200);
   });
 
